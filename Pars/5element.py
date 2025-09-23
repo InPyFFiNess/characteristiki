@@ -48,6 +48,7 @@ for item in links:
     data.append({
         "url": item,
         "Название": title,
+        "Бренд": brend,
         "Частота обновления экрана": Gh,
         "Объем встроенной памяти" : memory
     })

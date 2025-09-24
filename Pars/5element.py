@@ -30,7 +30,9 @@ for item in links:
     time.sleep(2)
     try:
         title = driver.find_element(By.CLASS_NAME, value="section-heading__title").text
+        price = driver.find_element(By.CLASS_NAME, value="pp-price").text
         driver.get(f'{item}#characteristics')
+        time.sleep(2)
         try:
             brend = driver.find_element(By.XPATH, value='/html/body/div[2]/main/div[3]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[1]/div/table[1]/tbody/tr[1]/td[2]/b/a').text
         except:
@@ -41,6 +43,7 @@ for item in links:
             Gh = None
         try:
             memory = driver.find_element(By.XPATH, value="/html/body/div[2]/main/div[3]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[1]/div/table[3]/tbody/tr[4]/td[2]/b/a").text
+            print(memory)
         except:
             memory = None
     except:
@@ -50,7 +53,8 @@ for item in links:
         "Название": title,
         "Бренд": brend,
         "Частота обновления экрана": Gh,
-        "Объем встроенной памяти" : memory
+        "Объем встроенной памяти" : memory,
+        "Цена": price
     })
 
 driver.quit()

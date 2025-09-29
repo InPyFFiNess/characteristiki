@@ -8,10 +8,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+import random
 
-driver=webdriver.Chrome()
+chrome_version = random.randint(110, 140)
+windows_version = random.randint(10, 11)
+opts = Options()
+opts.add_argument(f"user-agent=Mozilla/5.0 (Windows NT {windows_version}.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_version}.0.0.0 Safari/537.36")
 
-driver.get("https://5element.by/catalog/377-smartfony")
+driver = webdriver.Chrome()
+
+#driver.get("https://5element.by/catalog/377-smartfony")
 
 def get_links_on_page():
     elements = driver.find_elements(By.CLASS_NAME, value = 'c-text')
@@ -20,9 +26,15 @@ def get_links_on_page():
     for element in elements:
         ads_list.append(element.get_attribute('href'))
     return ads_list
-#tractor + pricep = Rubets odobryaet!
-links = get_links_on_page()
 
+links = []
+
+for i in range(3):
+    driver.get(f"https://5element.by/catalog/377-smartfony?page={i+1}")
+    time.sleep(2)
+    links += get_links_on_page()
+
+print(len(links))
 data = []
 
 for item in links:
@@ -43,7 +55,6 @@ for item in links:
             Gh = None
         try:
             memory = driver.find_element(By.XPATH, value="/html/body/div[2]/main/div[3]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[1]/div/table[3]/tbody/tr[4]/td[2]/b/a").text
-            print(memory)
         except:
             memory = None
     except:

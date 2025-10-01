@@ -31,14 +31,14 @@ def get_links_on_page():
 
 links = []
 
-for i in range(3):
-    driver.get(f"https://5element.by/catalog/377-smartfony?page={i+1}")
-    time.sleep(2)
-    links += get_links_on_page()
+#for i in range(2):
+driver.get(f"https://5element.by/catalog/377-smartfony?page={1}")
+time.sleep(2)
+links += get_links_on_page()
+
 
 driver.quit()
-
-print(len(links))
+print(f"Количество всех ссылок = {len(links)}")
 data = []
 lock = threading.Lock()
 
@@ -47,27 +47,30 @@ def parse_link(link):
     windows_version = random.randint(10, 11)
     opts = Options()
     opts.add_argument(f"user-agent=Mozilla/5.0 (Windows NT {windows_version}.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_version}.0.0.0 Safari/537.36")
-
     local_driver = webdriver.Chrome(options=opts)
     try:
-        local_driver.get(link)
-        time.sleep(2)
-        title = local_driver.find_element(By.CLASS_NAME, "section-heading__title").text
-        price = local_driver.find_element(By.CLASS_NAME, "pp-price").text
-
         local_driver.get(f'{link}#characteristics')
         time.sleep(2)
-
+        char_link = local_driver.find_element(By.CLASS_NAME, value="characteristic-link ")
+        char_link.click()
         try:
-            brend = local_driver.find_element(By.XPATH, '/html/body/div[2]/main/div[3]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[1]/div/table[1]/tbody/tr[1]/td[2]/b/a').text
+            title = local_driver.find_element(By.CLASS_NAME, value="section-heading__title").text
+        except:
+            title = None
+        try:
+            price = local_driver.find_element(By.CLASS_NAME, value="pp-price").text
+        except:
+            price = None
+        try:
+            brend = local_driver.find_element(By.XPATH, value='/html/body/div[2]/main/div[3]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[1]/div/table[1]/tbody/tr[1]/td[2]/b/a').text
         except:
             brend = None
         try:
-            Gh = local_driver.find_element(By.XPATH, "/html/body/div[2]/main/div[3]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[1]/div/table[2]/tbody/tr[7]/td[2]/b").text
+            Gh = local_driver.find_element(By.XPATH, value="/html/body/div[2]/main/div[3]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[1]/div/table[2]/tbody/tr[7]/td[2]/b").text
         except:
             Gh = None
         try:
-            memory = local_driver.find_element(By.XPATH, "/html/body/div[2]/main/div[3]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[1]/div/table[3]/tbody/tr[4]/td[2]/b/a").text
+            memory = local_driver.find_element(By.XPATH, value="/html/body/div[2]/main/div[3]/div[1]/div/div[1]/div[2]/div/div/div[2]/div/div[1]/div/table[3]/tbody/tr[4]/td[2]/b/a").text
         except:
             memory = None
 
@@ -85,7 +88,7 @@ def parse_link(link):
     finally:
         local_driver.quit()
 
-with ThreadPoolExecutor(max_workers=5) as executor:
+with ThreadPoolExecutor(max_workers=3) as executor:
     executor.map(parse_link, links)
 
 df = pd.DataFrame(data)

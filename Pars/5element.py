@@ -11,6 +11,7 @@ from selenium.webdriver.chrome.service import Service
 import random
 from concurrent.futures import ThreadPoolExecutor
 import threading
+import re
 
 chrome_version = random.randint(110, 140)
 windows_version = random.randint(10, 11)
@@ -23,7 +24,6 @@ driver = webdriver.Chrome(options=opts)
 
 def get_links_on_page():
     elements = driver.find_elements(By.CLASS_NAME, value = 'c-text')
-    #"#container > div > div > div > div > div.catalog-content > div.catalog-wrapper > div > div > div.catalog-form__tabs > div > div > div > div > div.catalog-form__filter-part.catalog-form__filter-part_2 > div.catalog-form__offers > div > div:nth-child(1) > div > div > div.catalog-form__offers-part.catalog-form__offers-part_data > div.catalog-form__description.catalog-form__description_primary.catalog-form__description_base-additional.catalog-form__description_font-weight_semibold.catalog-form__description_condensed-other > a"
     ads_list = []
     for element in elements:
         ads_list.append(element.get_attribute('href'))
@@ -55,8 +55,14 @@ def parse_link(link):
         char_link.click()
         try:
             title = local_driver.find_element(By.CLASS_NAME, value="section-heading__title").text
+            new_title_match = re.search(r'^.*?\d+(GB|TB)', title)
+            if new_title_match:
+                new_title = new_title_match.group()
+            else:
+                new_title = title
         except:
             title = None
+            new_title = None
         try:
             price = local_driver.find_element(By.CLASS_NAME, value="pp-price").text
         except:
@@ -77,7 +83,7 @@ def parse_link(link):
         with lock:
             data.append({
                 "url": link,
-                "Название": title,
+                "Название": new_title,
                 "Бренд": brend,
                 "Частота обновления экрана": Gh,
                 "Объем встроенной памяти": memory,
@@ -92,4 +98,6 @@ with ThreadPoolExecutor(max_workers=3) as executor:
     executor.map(parse_link, links)
 
 df = pd.DataFrame(data)
+df = df.drop_duplicates(subset=["Название"])
+data = df.to_dict('records')
 df.to_csv("links.csv", index=False, encoding="utf-8-sig")
